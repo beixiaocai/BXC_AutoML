@@ -1,0 +1,11 @@
+.idea
+.idea/*
+.vscode/*
+.vscode
+# Logs
+log
+logs
+*.log
+venv/*
+
+__pycache__

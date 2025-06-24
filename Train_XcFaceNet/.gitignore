@@ -1,0 +1,14 @@
+.idea
+.idea/*
+.vscode/*
+.vscode
+# Logs
+log
+logs
+runs*
+datasets*
+*.log
+venv/*
+
+__pycache__
+models/*

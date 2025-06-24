@@ -1,0 +1,6 @@
+.vs/*
+.idea/*
+build*
+ultralytics*
+ultralytics.egg-info*
+venv*

@@ -1,0 +1,7 @@
+opencv-python==4.5.4.60
+pillow==10.3.0
+numpy==1.26.4
+requests==2.31.0
+torch==2.1.2
+torchvision==0.16.2
+torchaudio==2.1.2
