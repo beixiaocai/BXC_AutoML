@@ -1,0 +1,16 @@
+opencv-python==4.5.4.60
+pillow==10.3.0
+numpy==1.26.4
+requests==2.31.0
+torch==2.1.2
+torchvision==0.16.2
+torchaudio==2.1.2
+tqdm==4.67.1
+matplotlib==3.10.3
+scikit-learn==1.7.0
+soundfile==0.13.1 # 很重要，作为torchaudio读取音频文件的后端，否则torchaudio可能无法正常安装
+librosa==0.11.0
+openvino==2024.3.0
+openvino-dev==2024.3.0
+onnxruntime==1.19.0
+onnx==1.16.1

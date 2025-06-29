@@ -15,7 +15,8 @@
 * Train_rk_yolo8: 适用于瑞芯微设备的yolo8模型训练框架
 * Train_rk_yolo11: 适用于瑞芯微设备的yolo11模型训练框架
 * onnx2rknn: 适用于瑞芯微设备的onnx模型转换为rknn模型工具
-* Train_ResNet: 基于ResNet的图片分类算法训练框架
+* Train_AudioNet: 基于ResNet的语音分类算法训练框架
+* Train_ResNet:   基于ResNet的图片分类算法训练框架
 * Train_XcFaceNet: 基于MobileNet的人脸特征提取算法训练框架
 * Train_PlateNet: 基于PaddleOCR框架和PP-OCRv4开源模型训练商用级高质量车牌识别模型
 * Train_CnnLstm: 基于Cnn+Lstm的视频分类算法训练框架
@@ -33,6 +34,8 @@
 * [视频行为分析系统v4 xcms](https://gitee.com/Vanishi/xcms)
 
 ### 更新记录
+#### 2025/06/29
+* 新增Train_AudioNet
 #### 2025/06/24
 * 新增Train_PlateNet
 * 优化labeltools/dataset_detect_reset_detect.py
@@ -74,15 +77,18 @@
 
 ### 训练数据集（免费下载）
 * 训练数据集-夸克网盘下载地址：https://pan.quark.cn/s/5dcc2f724bcc
+* 检测密集人群数据集20250625
+* 检测明厨亮灶数据集20250625
 * 检测攀爬数据集20250624
 * 检测抽烟数据集20241012
 * 检测打架数据集20241012
 * 检测反光衣数据集20241013
 * 检测粉尘数据集20241013
 * 检测火焰烟雾数据集20241012
-* 检测人体5动作-站着-摔倒-坐-深蹲-跑数据集20241012
 * 检测人头和安全帽数据集20241013
-* 检测睡岗数据集20241210
+* 检测人体5动作-站着-摔倒-坐-深蹲-跑数据集20241012
 * 检测学生3状态数据集20241022
+* 检测睡岗数据集20241210
 * 猫狗2分类数据集-夸克网盘下载地址 https://pan.quark.cn/s/982dd16cb29d
 * 车型9分类数据集-夸克网盘下载地址 https://pan.quark.cn/s/f698d0e99a4b
+* 打鼾+不打鼾语音识别2分类数据集-夸克网盘下载地址：https://pan.quark.cn/s/4d83dabff0a6
