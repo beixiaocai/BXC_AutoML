@@ -24,11 +24,11 @@ def handle(src_detect_dir, dst_detect_dir, freq=5):
 
             if len(names) == 2:
                 name = names[0]
-                print("parse1:", len(names), "name=", name)
+                print("parse1 success filename=%s,name=%s,len(names)=%d " % (filename, name, len(names)))
             else:
                 if filename.endswith(".jpg"):
                     name = filename[0:-4]
-                print("parse2:", len(names), "name=", name)
+                    print("parse2 success filename=%s,name=%s,len(names)=%d " % (filename, name, len(names)))
 
             if name:
                 src_image_path = os.path.join(src_detect_images_dir, name+".jpg")
@@ -61,14 +61,20 @@ def handle(src_detect_dir, dst_detect_dir, freq=5):
                         os.remove(dst_label_path)
                     except: pass
             else:
-                print("filename=%s format error" % str(filename))
+                print("parse error filename=%s,len(names)=%d " % (filename, len(names)))
 
         i += 1
 
 if __name__ == '__main__':
     # 将训练样本按照指定频率拆分一部分到测试样本
+    # handle(
+    #     src_detect_dir="F:\\ai\\data\\20250712factory\\factory_group0724_yolo_detect\\train",
+    #     dst_detect_dir="F:\\ai\\data\\20250712factory\\factory_group0724_yolo_detect\\valid",
+    #     freq=5
+    # )
+
     handle(
-        src_detect_dir="D:\\datasets\\bxc_detect_sample\\knife_gun_group\\train",
-        dst_detect_dir="D:\\datasets\\bxc_detect_sample\\knife_gun_group\\valid",
-        freq=6
+        src_detect_dir="F:\\ai\\data\\20250712factory\\label_0726_seg_yolo_seg\\train",
+        dst_detect_dir="F:\\ai\\data\\20250712factory\\label_0726_seg_yolo_seg\\valid",
+        freq=3
     )

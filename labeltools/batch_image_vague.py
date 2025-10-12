@@ -52,7 +52,7 @@ def handle(src_dir, dst_dir, level=3):
 
 if __name__ == '__main__':
     handle(
-        src_dir="D:\\file\\images\\baideng",
-        dst_dir="D:\\file\\images\\baideng_vague",
+        src_dir="D:\\file\\images",
+        dst_dir="D:\\file\\images_vague",
         level=3  # 模糊级别 0-100（数值越大，越模糊，0表示原图复制，1-100表示逐渐模糊）
     )

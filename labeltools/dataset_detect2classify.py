@@ -16,11 +16,11 @@ def handle():
 
         if len(names) == 2:
             name = names[0]
-            print("parse1:", len(names), "name=", name)
+            print("parse1 success filename=%s,name=%s,len(names)=%d " % (filename,name,len(names)))
         else:
             if filename.endswith(".jpg"):
                 name = filename[0:-4]
-            print("parse2:", len(names), "name=", name)
+                print("parse2 success filename=%s,name=%s,len(names)=%d " % (filename, name, len(names)))
 
         if name:
             try:
@@ -74,17 +74,15 @@ def handle():
             except Exception as e:
                 print("报错:", e)
         else:
-            print("filename=%s format error" % str(filename))
-            # if index > 3:
-            #     break
+            print("parse error filename=%s,len(names)=%d " % (filename, len(names)))
 
     cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
 
-    images_dir = "F:\\ai\\data\\face_group\\detect\\train\\images"
-    labels_dir = "F:\\ai\\data\\face_group\\detect\\train\\labels"
-    classify_dir = "F:\\ai\\data\\face_group\\classify"
+    images_dir = "F:\\ai\\data\\20250624buy\\Z_8300YOLO\\train\\images"
+    labels_dir = "F:\\ai\\data\\20250624buy\\Z_8300YOLO\\train\\labels"
+    classify_dir = "F:\\ai\\data\\20250624buy\\Z_8300YOLO_classify"
 
     handle()

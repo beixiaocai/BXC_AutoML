@@ -15,9 +15,10 @@
 * Train_rk_yolo8: 适用于瑞芯微设备的yolo8模型训练框架
 * Train_rk_yolo11: 适用于瑞芯微设备的yolo11模型训练框架
 * onnx2rknn: 适用于瑞芯微设备的onnx模型转换为rknn模型工具
-* Train_AudioNet: 基于ResNet的语音分类算法训练框架
 * Train_ResNet:   基于ResNet的图片分类算法训练框架
-* Train_XcFaceNet: 基于MobileNet的人脸特征提取算法训练框架
+* Train_AudioNet: 适用于音频片段分类的算法训练框架
+* Train_VideoNet: 适用于视频片段分类的算法训练框架
+* Train_XcFaceNet:  适用于人脸特征提取的算法训练框架
 * Train_PlateNet: 基于PaddleOCR框架和PP-OCRv4开源模型训练商用级高质量车牌识别模型
 * Train_CnnLstm: 基于Cnn+Lstm的视频分类算法训练框架
 * labeltools: 样本转换脚本
@@ -34,6 +35,8 @@
 * [视频行为分析系统v4 xcms](https://gitee.com/Vanishi/xcms)
 
 ### 更新记录
+#### 2025/10/12
+* 更新Train_ResNet，Train_AudioNet，Train_XcFaceNet，Train_PlateNet，新增Train_VideoNet
 #### 2025/06/29
 * 新增Train_AudioNet
 #### 2025/06/24

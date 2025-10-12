@@ -31,8 +31,17 @@ def handle(src_dir, dst_dir,flag = None):
     if len(filenames) > 0:
         for filename in filenames:
             name = None
-            if filename.endswith(".jpg"):
-                name = filename[:-4]
+            names = filename.split(".")
+
+            if len(names) == 2:
+                name = names[0]
+                print("parse1 success filename=%s,name=%s,len(names)=%d " % (filename, name, len(names)))
+            else:
+                if filename.endswith(".jpg"):
+                    name = filename[0:-4]
+                    print("parse2 success filename=%s,name=%s,len(names)=%d " % (filename, name, len(names)))
+
+
             if name:
                 saveCount += 1
 
@@ -52,7 +61,8 @@ def handle(src_dir, dst_dir,flag = None):
 
                     shutil.copy(src_label_path, dst_label_path)
                     shutil.copy(src_image_path, dst_image_path)
-
+            else:
+                print("parse error filename=%s,len(names)=%d " % (filename, len(names)))
 
 def handle_parent(src_parent_dir, dst_dir):
     print("handle_parent() start")
@@ -72,6 +82,20 @@ if __name__ == '__main__':
 
 
     handle(
-        src_dir="E:\\datasets\\bxc_detect_sample_stand_fall_sit_squat_run\\train",
-        dst_dir="E:\\datasets\\bxc_detect_sample_stand_fall_sit_squat_run2\\train"
+        src_dir="F:\\ai\\data\\20250624buy\\Z_8300YOLO\\train",
+        dst_dir="F:\\ai\\data\\20250624buy\\Z_8300YOLO_detect\\train"
     )
+    handle(
+        src_dir="F:\\ai\\data\\20250624buy\\Z_8300YOLO\\val",
+        dst_dir="F:\\ai\\data\\20250624buy\\Z_8300YOLO_detect\\valid"
+    )
+
+
+    """
+        handle_parent(
+        src_parent_dir="F:\\ai\\datasets_xy\\detect_climb_noclimb",
+        dst_dir="F:\\ai\\datasets_xy\\detect_climb_noclimb_clean\\train"
+    )
+
+
+    """

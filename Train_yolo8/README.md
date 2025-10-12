@@ -21,10 +21,14 @@
 
 ### Python安装 pytorch-cpu版本yolo8（Linux建议Python3.8，Windows建议Python3.10）
 * pip install ultralytics==8.2.86 -i https://pypi.tuna.tsinghua.edu.cn/simple
+* pip install numpy==1.26.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （Windows-Python3.10）
+* pip install numpy==1.24.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （Linux-Python3.8）
 * pip install torch==2.1.2 torchvision==0.16.2 -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ### Python安装 pytorch-cuda版本yolo8（Linux建议Python3.8，Windows建议Python3.10）
 * pip install ultralytics==8.2.86 -i https://pypi.tuna.tsinghua.edu.cn/simple
+* pip install numpy==1.26.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （Windows-Python3.10）
+* pip install numpy==1.24.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （Linux-Python3.8）
 * pip install torch==2.1.0 torchaudio==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cu121
 * 注意：安装pytorch-gpu训练环境，请根据自己的电脑硬件选择cuda版本，比如我上面选择的https://download.pytorch.org/whl/cu121，并非适用所有电脑设备，请根据自己的设备选择
 

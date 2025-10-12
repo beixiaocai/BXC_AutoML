@@ -8,8 +8,11 @@
 | python     | 3.8+    |
 | 依赖库      | requirements.txt |
 
-### 安装依赖库
-    * pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+### 安装依赖库（Windows-Python3.10）
+* pip install -r requirements-windows.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+### 安装依赖库（Linux-Python3.8）
+* pip install -r requirements-linux.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 
 ### 如何使用

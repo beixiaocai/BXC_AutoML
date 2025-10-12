@@ -1,120 +1,181 @@
-import json
 import os
-import time
+import json
 import shutil
-
-g_label2index = {
-    "water": 0
-}
-
-
-def handle(labelme_dir, detect_dir):
-    filenames = os.listdir(labelme_dir)
-    print("handle() labelme_dir=%s,len(filenames)=%d" % (labelme_dir, len(filenames)))
-
-    detect_images_dir = os.path.join(detect_dir, "images")
-    detect_labels_dir = os.path.join(detect_dir, "labels")
-    if not os.path.exists(detect_images_dir):
-        os.makedirs(detect_images_dir)
-    if not os.path.exists(detect_labels_dir):
-        os.makedirs(detect_labels_dir)
-
-    flag = "random" + str(int(time.time()))
-    index = 0
-    for filename in filenames:
-        if filename.endswith(".json"):
-            names = filename.split(".")
-            if len(names) == 2:
-                name = names[0]
-                print("开始处理第%d张图片%s" % (index, filename))
-                # try:
-                json_filepath = os.path.join(labelme_dir, filename)
-                f = open(json_filepath, "r")
-                content = f.read()
-                f.close()
-
-                json_data = json.loads(content)
-                # version = json_data.get("version")
-                shapes = json_data.get("shapes")
-                imagePath = json_data.get("imagePath")
-                imageWidth = json_data.get("imageWidth")
-                imageHeight = json_data.get("imageHeight")
-
-                imagePath_abs = os.path.join(labelme_dir, imagePath)
-                if os.path.exists(imagePath_abs) and len(shapes) > 0:
-                    j = 0
-                    save_name = "%s-%d" % (flag, index)
-                    save_image_filepath = os.path.join(detect_images_dir, save_name + ".jpg")
-                    save_label_filepath = os.path.join(detect_labels_dir, save_name + ".txt")
-
-                    success_count = 0
-                    try:
-                        save_label_f = open(save_label_filepath, "w")
-                        for shape in shapes:
-                            label = shape.get("label")
-                            shape_type = shape.get("shape_type")
-                            points = shape.get("points")
-                            # print(label, shape_type, points)
-
-                            points_len = len(points)
-                            if points_len >= 2:
-                                label_index = g_label2index.get(label, None)
-                                if label_index is None:
-                                    print("\t未定义的标签名:json_filepath=%s" % json_filepath)
-                                else:
-                                    save_label_f.write("%d" % label_index)
-                                    success_count += 1
-                                    for i in range(points_len):
-                                        x = float(points[i][0])
-                                        y = float(points[i][1])
-
-                                        if 0 <= x <= imageWidth and 0 <= y <= imageHeight:
-                                            x_ratio = x / float(imageWidth)
-                                            y_ratio = x / float(imageHeight)
-
-                                            line_content = " %.6f %.6f" % (x_ratio, y_ratio)
-                                            save_label_f.write(line_content)
-                                        else:
-                                            print("\t目标框超过了背景范围")
-                                    save_label_f.write("\n")
-
-                            j += 1
-                        save_label_f.close()
+import random
+import numpy as np
+from pathlib import Path
+from tqdm import tqdm
+import cv2
 
 
-                    except Exception as e:
-                        print("处理图片时发生错误：", e)
+class LabelmeToYOLOv11Converter:
+    def __init__(self, labelme_dir, output_dir, label_map, split_ratios=(0.8, 0.1, 0.1)):
+        """
+        :param labelme_dir: LabelMe标注文件所在目录（包含.json和对应图像）
+        :param output_dir: YOLOv11格式数据集输出根目录
+        :param label_map: 类别名称到ID的映射字典（如 {"cat": 0, "dog": 1}）
+        :param split_ratios: 训练集/验证集/测试集划分比例（默认0.8:0.1:0.1）
+        """
+        self.labelme_dir = Path(labelme_dir)
+        self.output_dir = Path(output_dir)
+        self.label_map = label_map
+        self.split_ratios = split_ratios
 
-                    if success_count > 0:
-                        shutil.copyfile(imagePath_abs, save_image_filepath)
-                    else:
-                        print("图片(%s)无目标框，删除label文件: " % imagePath_abs)
-                        try:
-                            os.remove(save_label_filepath)
-                        except:
-                            pass
+    def _create_dirs(self):
+        """创建YOLOv11标准目录结构"""
+        dirs = [
+            "images/train", "images/val", "images/test",
+            "labels/train", "labels/val", "labels/test"
+        ]
+        for d in dirs:
+            (self.output_dir / d).mkdir(parents=True, exist_ok=True)
 
-                # except Exception as e:
-                #     print("\t报错：第%d张图片%s" % (index, filename), e)
+    def _convert_single_annotation(self, json_path):
+        """转换单个LabelMe标注文件为YOLOv11分割格式"""
+        with open(json_path, 'r') as f:
+            data = json.load(f)
 
-                index += 1
+        imagePath = data['imagePath']
+        if imagePath.endswith('.jpg'):
+            json_name = os.path.basename(json_path)
+            imagePath = json_name.replace('.json', '.jpg')
+
+        img_path = self.labelme_dir / imagePath
+        if not img_path.exists():
+            return None, "Image not found"
+
+        img = cv2.imread(str(img_path))
+        if img is None:
+            return None, "Invalid image"
+        h, w = img.shape[:2]
+
+        yolo_lines = []
+        for shape in data['shapes']:
+            if shape['shape_type'] != 'polygon':
+                print("不支持的形状类型：",shape['shape_type'])
+                continue
+
+            label = shape['label']
+
+            print("label:",label)
+            if label not in self.label_map:
+                continue
+            class_id = self.label_map[label]
+            print("label:", label,"class_id:",class_id)
+            # 计算边界框
+            points = np.array(shape['points'])
+            x_min, y_min = np.min(points, axis=0)
+            x_max, y_max = np.max(points, axis=0)
+            x_center = ((x_min + x_max) / 2) / w
+            y_center = ((y_min + y_max) / 2) / h
+            width = (x_max - x_min) / w
+            height = (y_max - y_min) / h
+
+            # 归一化多边形点
+            normalized_points = []
+            for point in points:
+                norm_x = point[0] / w
+                norm_y = point[1] / h
+                normalized_points.extend([f"{norm_x:.6f}", f"{norm_y:.6f}"])
+
+            # 构建YOLO行（包含边界框和多边形）
+            yolo_line = f"{class_id} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f} " + " ".join(
+                normalized_points)
+            yolo_lines.append(yolo_line)
+
+        return yolo_lines, "Success"
+
+    def _generate_data_yaml(self):
+        """生成YOLOv11训练必需的data.yaml配置文件"""
+        content = f"path: {self.output_dir}\n"
+        content += "train: images/train\n"
+        content += "val: images/val\n"
+        content += "test: images/test\n\n"
+        content += "names:\n"
+        for name, id in self.label_map.items():
+            content += f"  {id}: {name}\n"
+
+        with open(self.output_dir / 'data.yaml', 'w') as f:
+            f.write(content)
+
+    def convert_and_split(self):
+        """执行完整转换流程"""
+        self._create_dirs()
+        json_files = [f for f in self.labelme_dir.glob('*.json')]
+        random.shuffle(json_files)
+
+        # 数据集划分
+        n_total = len(json_files)
+        n_train = int(n_total * self.split_ratios[0])
+        n_val = int(n_total * self.split_ratios[1])
+        train_files = json_files[:n_train]
+        val_files = json_files[n_train:n_train + n_val]
+        test_files = json_files[n_train + n_val:]
+
+        # 转换函数
+        def process_files(files, split_type):
+            success_count = 0
+            for json_path in tqdm(files, desc=f"Processing {split_type}"):
+                base_name = json_path.stem
+                img_path = json_path.with_suffix('.jpg')  # 支持.jpg/.png自动检测
+                if not img_path.exists():
+                    img_path = json_path.with_suffix('.png')
+
+                # 复制图像
+                if img_path.exists():
+                    shutil.copy(
+                        img_path,
+                        self.output_dir / "images" / split_type / f"{base_name}{img_path.suffix}"
+                    )
+                else:
+                    continue
+
+                # 转换标签
+                labels, status = self._convert_single_annotation(json_path)
+                if labels:
+                    with open(self.output_dir / "labels" / split_type / f"{base_name}.txt", 'w') as f:
+                        f.write("\n".join(labels))
+                    success_count += 1
+            return success_count
+
+        # 处理各数据集
+        train_success = process_files(train_files, "train")
+        val_success = process_files(val_files, "val")
+        test_success = process_files(test_files, "test")
+
+        # 生成配置文件
+        self._generate_data_yaml()
+
+        return {
+            "total_files": n_total,
+            "train": (len(train_files), train_success),
+            "val": (len(val_files), val_success),
+            "test": (len(test_files), test_success)
+        }
 
 
-def handle_parent(labelme_parent_dir, detect_dir):
-    print("handle_parent() start")
-
-    dir_names = os.listdir(labelme_parent_dir)
-    print("handle_parent() labelme_parent_dir=%s,len(dir_names)=%d" % (labelme_parent_dir, len(dir_names)))
-    for dir_name in dir_names:
-        labelme_dir = os.path.join(labelme_parent_dir, dir_name)
-        if os.path.isdir(labelme_dir) and not dir_name.startswith("__"):
-            handle(labelme_dir=labelme_dir, detect_dir=detect_dir)
-
-
-if __name__ == '__main__':
-    print("__main__")
-
-    handle(
-        labelme_dir="C:\\Users\\fufu\\Desktop\\action_video\\20240821waterlevel",
-        detect_dir="D:\\datasets\\bxc_segment_sample\\20240821waterlevel\\train"
+# ===================== 使用示例 =====================
+if __name__ == "__main__":
+    # 配置参数
+    converter = LabelmeToYOLOv11Converter(
+        labelme_dir="F:\\ai\\data\\20250712factory\\label_0817_seg_merge",  # LabelMe原始数据目录
+        output_dir="F:\\ai\\data\\20250712factory\\label_0817_seg_merge_yolo_seg",  # 输出目录（自动创建）
+        label_map={
+            "cartons": 0
+        },  # 类别映射
+        split_ratios=(0.6, 0.3, 0.1)  # 训练/验证/测试比例
     )
+
+    # 执行转换
+    results = converter.convert_and_split()
+
+    # 打印结果
+    print(f"\n{'=' * 50}\n转换完成！数据集结构已生成至: {converter.output_dir}")
+    print(f"样本统计:")
+    print(f"  - 总文件数: {results['total_files']}")
+    print(f"  - 训练集: {results['train'][1]}/{results['train'][0]} (成功/总数)")
+    print(f"  - 验证集: {results['val'][1]}/{results['val'][0]}")
+    print(f"  - 测试集: {results['test'][1]}/{results['test'][0]}")
+    print(f"配置文件: {converter.output_dir}/data.yaml")
+    print(f"\n下一步: 直接使用以下命令训练YOLOv11模型:")
+    print(f"yolo train-seg data={converter.output_dir}/data.yaml model=yolov11s-seg.yaml epochs=100 imgsz=640")

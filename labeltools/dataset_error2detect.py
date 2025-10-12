@@ -49,7 +49,7 @@ def handle():
 
 
 if __name__ == '__main__':
-    src_dir = "E:\\project\\ai\\datasets\\20240525-buy-smoke\\783_smoke"
-    dst_dir = "E:\\project\\ai\\datasets\\20240525-buy-smoke\\783_smoke_clean"
+    src_dir = "E:\\project\\ai\\datasets\\783_smoke"
+    dst_dir = "E:\\project\\ai\\datasets\\783_smoke_clean"
 
     handle()

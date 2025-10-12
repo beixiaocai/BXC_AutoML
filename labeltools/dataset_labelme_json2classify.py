@@ -17,11 +17,11 @@ def handle(labelme_dir, classify_dir):
 
             if len(names) == 2:
                 name = names[0]
-                print("parse1:", len(names), "name=", name)
+                print("parse1 success filename=%s,name=%s,len(names)=%d " % (filename, name, len(names)))
             else:
                 if filename.endswith(".json"):
                     name = filename[0:-5]
-                print("parse2:", len(names), "name=", name)
+                    print("parse2 success filename=%s,name=%s,len(names)=%d " % (filename, name, len(names)))
 
             if name:
                 print("开始处理第%d张图片%s" % (index, filename))
@@ -71,7 +71,7 @@ def handle(labelme_dir, classify_dir):
 
                 index += 1
             else:
-                print("filename=%s format error" % str(filename))
+                print("parse error filename=%s,len(names)=%d " % (filename, len(names)))
 
 
 def handle_parent(labelme_parent_dir, classify_dir):
@@ -84,8 +84,8 @@ def handle_parent(labelme_parent_dir, classify_dir):
 
 
 if __name__ == '__main__':
-    handle_parent(labelme_parent_dir="D:\\datasets\\sample\\knife-gun_group1",
-                  classify_dir="D:\\datasets\\bxc_classify_sample\\knife-gun_group120240828001")
+    handle_parent(labelme_parent_dir="F:\\ai\\data\\20250712factory\\factory_group0724",
+                  classify_dir="F:\\ai\\data\\20250712factory\\factory_group0724_classify")
 
     """
 
