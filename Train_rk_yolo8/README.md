@@ -1,6 +1,6 @@
 ### Train_rk_yolo8
 * 作者：北小菜 
-* 官网：http://www.beixiaocai.com
+* 官网：https://www.yuturuishi.com
 * 邮箱：bilibili_bxc@126.com
 * QQ：1402990689
 * 微信：bilibili_bxc
@@ -94,11 +94,11 @@ pip install torch==2.1.0 torchaudio==2.1.0 torchvision==0.16.0 --index-url https
 yolo -V
 
 //训练检测模型（gpu版本）
-yolo detect train model=yolov8n.pt data=/datasets/data.yaml batch=64 epochs=5 imgsz=640 device=cuda
-（注意：关于/datasets/data.yaml文件，是指向训练数据集的配置文件，如果不清楚可以先下载一份数据集参考下）
+yolo detect train model=yolov8n.pt data=xxx/data.yaml batch=-1 epochs=1000 imgsz=640 save_period=5 device=cuda 
+（注意：关于xxx/data.yaml文件，是指向训练数据集的配置文件，如果不清楚可以先下载一份数据集参考下）
 
 //训练检测模型（cpu版本）
-yolo detect train model=yolov8n.pt data=/datasets/data.yaml batch=64 epochs=5 imgsz=640 device=cpu
+yolo detect train model=yolov8n.pt data=xxx/data.yaml batch=-1 epochs=1000 imgsz=640 save_period=5 device=cpu
 
 //测试模型
 yolo detect predict model=runs/train/best.pt source=test.jpg
@@ -136,12 +136,19 @@ https://gitee.com/Vanishi/BXC_AutoML/tree/master/onnx2rknn
 
 ### 训练数据集（免费下载）
 * 训练数据集-夸克网盘下载地址：https://pan.quark.cn/s/5dcc2f724bcc
+* 检测密集人群数据集20250625
+* 检测明厨亮灶数据集20250625
+* 检测攀爬数据集20250624
 * 检测抽烟数据集20241012
 * 检测打架数据集20241012
 * 检测反光衣数据集20241013
 * 检测粉尘数据集20241013
 * 检测火焰烟雾数据集20241012
-* 检测人体5动作-站着-摔倒-坐-深蹲-跑数据集20241012
 * 检测人头和安全帽数据集20241013
-* 检测睡岗数据集20241210
+* 检测人体5动作-站着-摔倒-坐-深蹲-跑数据集20241012
 * 检测学生3状态数据集20241022
+* 检测睡岗数据集20241210
+* 检测手机数据集20251206
+* 猫狗2分类数据集-夸克网盘下载地址 https://pan.quark.cn/s/982dd16cb29d
+* 车型9分类数据集-夸克网盘下载地址 https://pan.quark.cn/s/f698d0e99a4b
+* 打鼾+不打鼾语音识别2分类数据集-夸克网盘下载地址：https://pan.quark.cn/s/4d83dabff0a6

@@ -1,6 +1,6 @@
 ### BXC_AutoML
 * 作者：北小菜 
-* 官网：http://www.beixiaocai.com
+* 官网：https://www.yuturuishi.com
 * 邮箱：bilibili_bxc@126.com
 * QQ：1402990689
 * 微信：bilibili_bxc
@@ -35,8 +35,10 @@
 * [视频行为分析系统v4 xcms](https://gitee.com/Vanishi/xcms)
 
 ### 更新记录
+#### 2025/12/21
+* 更新onnx2rknn/Train_yolo11/Train_yolo8/Train_rk_yolo11/Train_rk_yolo8模块文档
 #### 2025/10/12
-* 更新Train_ResNet，Train_AudioNet，Train_XcFaceNet，Train_PlateNet，新增Train_VideoNet
+* 更新Train_ResNet/Train_AudioNet/Train_XcFaceNet/Train_PlateNet，新增Train_VideoNet
 #### 2025/06/29
 * 新增Train_AudioNet
 #### 2025/06/24
@@ -92,6 +94,7 @@
 * 检测人体5动作-站着-摔倒-坐-深蹲-跑数据集20241012
 * 检测学生3状态数据集20241022
 * 检测睡岗数据集20241210
+* 检测手机数据集20251206
 * 猫狗2分类数据集-夸克网盘下载地址 https://pan.quark.cn/s/982dd16cb29d
 * 车型9分类数据集-夸克网盘下载地址 https://pan.quark.cn/s/f698d0e99a4b
 * 打鼾+不打鼾语音识别2分类数据集-夸克网盘下载地址：https://pan.quark.cn/s/4d83dabff0a6

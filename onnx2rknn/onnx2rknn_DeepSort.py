@@ -7,16 +7,16 @@ import os
 if __name__ == '__main__':
 
     MODEL_DIR = "models"
-    onnx_filename = "rk-yolo11n.onnx"
+    onnx_filename = "deepsort.onnx"
     platform = 'rk3568'
     do_quant = True # i8,u8,fp
-    width = 640
-    height = 640
+    width = 64
+    height = 128
 
     onnx_model_path = MODEL_DIR + "/" + onnx_filename
     rknn_model_path = '{MODEL_DIR}/{onnx_filename}-to-{platform}-{width}x{height}.rknn'.format(
         MODEL_DIR=MODEL_DIR,
-        onnx_filename=onnx_filename.split(".")[0],
+        onnx_filename=onnx_filename,
         platform=platform,
         width=width,
         height=height)
@@ -28,8 +28,8 @@ if __name__ == '__main__':
     rknn.config(mean_values=[[0, 0, 0]], std_values=[[255, 255, 255]], target_platform=platform)
     # Load model
     print('--> Loading model')
-    #ret = rknn.load_onnx(model=onnx_model_path, inputs=['input'], input_size_list=[[1, 3, height, width]])
-    ret = rknn.load_onnx(model=onnx_model_path)
+    ret = rknn.load_onnx(model=onnx_model_path, inputs=['input'], input_size_list=[[1, 3, height, width]])
+    # ret = rknn.load_onnx(model=onnx_model_path)
 
     if ret != 0:
         print('load model failed!')
