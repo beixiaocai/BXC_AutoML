@@ -4,9 +4,9 @@ import time
 import shutil
 
 g_label2index = {
-    "cartons": 0,
-    "ConveyorBelt": 1,
-    "cart": 2,
+    "Workwear": 0,
+    # "ConveyorBelt": 1,
+    # "cart": 2,
     # "gun": 1,
     # "dao": 2,
     # "baipai": 3
@@ -146,14 +146,14 @@ def handle_parent(labelme_parent_dir, detect_dir):
 if __name__ == '__main__':
     print("__main__")
 
-    # handle(
-    #     labelme_dir="D:\\file\\data",
-    #     detect_dir="F:\\ai\\data\\20250712factory\\factory_group0715_detect\\train"
-    # )
+    handle(
+        labelme_dir="E:\\data\\gongfu\\images",
+        detect_dir="E:\\data\\gongfu\\images_detect\\train"
+    )
  
 
-    handle_parent(
-        labelme_parent_dir="F:\\ai\\data\\20250712factory\\factory_group0724",
-        detect_dir="F:\\ai\\data\\20250712factory\\factory_group0724_yolo_detect\\train"
-    )
+    # handle_parent(
+    #     labelme_parent_dir="E:\\data\\gongfu\\images",
+    #     detect_dir="E:\\data\\gongfu\\images_detect\\train"
+    # )
 

@@ -18,8 +18,8 @@
 * Train_ResNet:   基于ResNet的图片分类算法训练框架
 * Train_AudioNet: 适用于音频片段分类的算法训练框架
 * Train_VideoNet: 适用于视频片段分类的算法训练框架
-* Train_XcFaceNet:  适用于人脸特征提取的算法训练框架
-* Train_PlateNet: 基于PaddleOCR框架和PP-OCRv4开源模型训练商用级高质量车牌识别模型
+* Train_XcFaceNet:适用于人脸识别，人脸特征提取的算法训练框架
+* Train_XcOCR:    适用于OCR识别，车牌字符识别的算法训练框架
 * Train_CnnLstm: 基于Cnn+Lstm的视频分类算法训练框架
 * labeltools: 样本转换脚本
 
@@ -35,14 +35,15 @@
 * [视频行为分析系统v4 xcms](https://gitee.com/Vanishi/xcms)
 
 ### 更新记录
+#### 2026/01/08
+* 新增XcOCR代替此前PaddleOCR_Plate的车牌识别方案（XcOCR是自研算法框架，尤其适合瑞芯微等边缘设备，性能极好。 PaddleOCR_Plate虽然做车牌识别效果不错，但是在不同的推理引擎适配过于麻烦，问题较多）
 #### 2025/12/21
 * 更新onnx2rknn/Train_yolo11/Train_yolo8/Train_rk_yolo11/Train_rk_yolo8模块文档
 #### 2025/10/12
-* 更新Train_ResNet/Train_AudioNet/Train_XcFaceNet/Train_PlateNet，新增Train_VideoNet
+* 更新Train_ResNet/Train_AudioNet/Train_XcFaceNet，新增Train_VideoNet
 #### 2025/06/29
 * 新增Train_AudioNet
 #### 2025/06/24
-* 新增Train_PlateNet
 * 优化labeltools/dataset_detect_reset_detect.py
 #### 2025/06/03
 * 新增免费下载的训练数据集

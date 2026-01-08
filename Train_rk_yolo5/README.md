@@ -1,6 +1,6 @@
 ### Train_rk_yolo5
 * 作者：北小菜 
-* 官网：http://www.beixiaocai.com
+* 官网：https://www.yuturuishi.com
 * 邮箱：bilibili_bxc@126.com
 * QQ：1402990689
 * 微信：bilibili_bxc
@@ -27,10 +27,15 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 //（如果电脑没有英伟达显卡，可以安装cpu版pytorch2.1.0）
 pip install torch==2.1.0 torchaudio==2.1.0 torchvision==0.16.0
+pip install opencv-python==4.5.4.60 -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install numpy==1.26.4 -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install pillow==9.0.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 //（如果电脑有英伟达显卡，并且安装了显卡驱动，可以安装cuda版pytorch2.1.0加速）
 pip install torch==2.1.0 torchaudio==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cu121
-
+pip install opencv-python==4.5.4.60 -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install numpy==1.26.4 -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install pillow==9.0.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
 ~~~
 
 
@@ -38,9 +43,8 @@ pip install torch==2.1.0 torchaudio==2.1.0 torchvision==0.16.0 --index-url https
 ~~~
 
 //开启训练
-python train.py  --weights yolov5n.pt --data /data/smoke/data.yaml --epochs 10  --batch-size 64 --device 0
-
-请注意：/data/smoke/data.yaml就是对应样本数据
+python train.py  --weights yolov5n.pt --data xxx/data.yaml --epochs 600 --save-period 5  --batch-size -1 --device 0
+（注意：关于xxx/data.yaml文件，是指向训练数据集的配置文件，如果不清楚可以先下载一份数据集参考下）
 
 //测试模型示例1
 python detect.py  --weights=yolov5n.pt --source=bus.jpg  --device=cpu

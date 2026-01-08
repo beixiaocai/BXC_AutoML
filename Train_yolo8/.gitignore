@@ -1,11 +1,11 @@
-.idea
-.idea/*
-.vscode/*
-.vscode
-# Logs
-log
-logs
-*.log
+﻿# clion
+.idea/
+# vs
+.vs
+
+
+dist/*
+build/*
+runs/*
 venv/*
-models/*
-yolov8n.onnx
+__pycache__

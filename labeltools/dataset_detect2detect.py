@@ -74,7 +74,7 @@ if __name__ == '__main__':
     # )
 
     handle(
-        src_detect_dir="F:\\ai\\data\\20250712factory\\label_0726_seg_yolo_seg\\train",
-        dst_detect_dir="F:\\ai\\data\\20250712factory\\label_0726_seg_yolo_seg\\valid",
-        freq=3
+        src_detect_dir="E:\\datasets\\detect_phone\\train",
+        dst_detect_dir="E:\\datasets\\detect_phone\\valid",
+        freq=4
     )

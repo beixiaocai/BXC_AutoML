@@ -82,14 +82,9 @@ if __name__ == '__main__':
 
 
     handle(
-        src_dir="F:\\ai\\data\\20250624buy\\Z_8300YOLO\\train",
-        dst_dir="F:\\ai\\data\\20250624buy\\Z_8300YOLO_detect\\train"
+        src_dir="E:\\datasets\\detect_phone\\train",
+        dst_dir="E:\\datasets\\detect_phone2\\train"
     )
-    handle(
-        src_dir="F:\\ai\\data\\20250624buy\\Z_8300YOLO\\val",
-        dst_dir="F:\\ai\\data\\20250624buy\\Z_8300YOLO_detect\\valid"
-    )
-
 
     """
         handle_parent(

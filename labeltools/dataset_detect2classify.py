@@ -81,8 +81,8 @@ def handle():
 
 if __name__ == '__main__':
 
-    images_dir = "F:\\ai\\data\\20250624buy\\Z_8300YOLO\\train\\images"
-    labels_dir = "F:\\ai\\data\\20250624buy\\Z_8300YOLO\\train\\labels"
-    classify_dir = "F:\\ai\\data\\20250624buy\\Z_8300YOLO_classify"
+    images_dir = "E:\\datasets\\detect_phone\\train\\images"
+    labels_dir = "E:\\datasets\\detect_phone\\train\\labels"
+    classify_dir = "E:\\datasets\\detect_phone_classify"
 
     handle()
