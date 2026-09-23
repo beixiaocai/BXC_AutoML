@@ -1,41 +1,41 @@
 ### Train_yolo11
-* 作者：北小菜 
 * 官网：https://www.yuturuishi.com
-* 邮箱：bilibili_bxc@126.com
-* QQ：1402990689
-* 微信：bilibili_bxc
-* 哔哩哔哩主页：https://space.bilibili.com/487906612
+* 微信：yuturuishi
 * gitee开源地址：https://gitee.com/Vanishi/BXC_AutoML
 * github开源地址：https://github.com/beixiaocai/BXC_AutoML
 
-### 安装Python（Linux建议Python3.8，Windows建议Python3.10）
-* [python-官网下载地址](https://www.python.org/getit/)
-* [python-夸克网盘下载地址](https://pan.quark.cn/s/72df133d1343)
-
+### 安装Python
+* Windows实测Python3.12，建议3.10~3.12
 
 ### 推荐使用Python虚拟环境
 * 在使用python开发项目时，推荐使用python的虚拟环境，因为同一台电脑上很可能会安装多个python项目，而不同的python项目可能会使用不同的依赖库，为了避免依赖库不同而导致的冲突，强烈建议使用python虚拟环境
 * 关于如何使用python虚拟环境，非常简单，文档最下面提供Windows系统和Linux系统创建和使用虚拟环境的方法
 
 
-### Python安装 pytorch-cpu版本yolo11（Linux建议Python3.8，Windows建议Python3.10）
+### Python安装 pytorch-cpu版本yolo11（按顺序执行，numpy 必须最后装，原因见下方注意事项）
 * pip install ultralytics==8.3.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
-* pip install numpy==1.26.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （Windows-Python3.10）
-* pip install numpy==1.24.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （Linux-Python3.8）
-* pip install torch==2.1.2 torchvision==0.16.2 -i https://pypi.tuna.tsinghua.edu.cn/simple
+* pip install torch==2.2.0 torchvision==0.17.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
+* pip install opencv-python==4.8.1.78 -i https://pypi.tuna.tsinghua.edu.cn/simple
+* pip install numpy==1.26.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （必须最后装，见注意事项①）
 
-### Python安装 pytorch-cuda版本yolo11（Linux建议Python3.8，Windows建议Python3.10）
+### Python安装 pytorch-cuda版本yolo11（按顺序执行，numpy 必须最后装，原因见下方注意事项）
 * pip install ultralytics==8.3.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
-* pip install numpy==1.26.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （Windows-Python3.10）
-* pip install numpy==1.24.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （Linux-Python3.8）
-* pip install torch==2.1.0 torchaudio==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cu121
-* 注意：安装pytorch-gpu训练环境，请根据自己的电脑硬件选择cuda版本，比如我上面选择的https://download.pytorch.org/whl/cu121，并非适用所有电脑设备，请根据自己的设备选择
+* pip install torch==2.2.0 torchaudio==2.2.0 torchvision==0.17.0 --index-url https://download.pytorch.org/whl/cu121
+* pip install opencv-python==4.8.1.78 -i https://pypi.tuna.tsinghua.edu.cn/simple
+* pip install numpy==1.26.4 -i https://pypi.tuna.tsinghua.edu.cn/simple （必须最后装，见注意事项①）
+
+* 注意①：**torch 2.2.x 是基于 NumPy 1.x 编译的，和 numpy 2.x 不兼容**。装 ultralytics 时 pip 会自动带上 numpy 2.x，启动就报 `Failed to initialize NumPy: _ARRAY_API not found`，训练一进数据加载就崩。所以**无论按什么顺序装，最后一步必须执行 `pip install numpy==1.26.4` 把 numpy 钉回 1.x**。以后在这个环境里升级/新装其他库时，若 pip 提示要升级 numpy 到 2.x，记得拒绝。
+* 注意②：以上版本组合（torch 2.2.0+cu121 / torchvision 0.17.0 / torchaudio 2.2.0 / numpy 1.26.4 / ultralytics 8.3.1 / Python 3.12）已验证可正常导入与训练。另外 Python3.12 装不了 torch 2.1.x（没有 cp312 的 wheel，cp312 从 torch 2.2.0 才开始提供），需要老版本 torch 请换 Python 3.10/3.11。另注意：**opencv-python 5.x 的依赖元数据要求 numpy>=2，与 ultralytics 8.3.1（要求 numpy<2）互相冲突**，所以本环境 opencv 必须用 4.x（如 4.8.1.78）。
+* 注意③：安装pytorch-gpu训练环境，请根据自己的电脑硬件选择cuda版本，比如我上面选择的https://download.pytorch.org/whl/cu121，并非适用所有电脑设备，请根据自己的设备选择
 
 
 ### 快速开始
 ~~~
 //查看已安装的yolo11版本
 yolo -V
+
+//验证环境是否正常（应输出 ultralytics 8.3.1 / cuda True，且无任何 NumPy 警告）
+python -c "import ultralytics,torch; print(ultralytics.__version__); print('cuda', torch.cuda.is_available())"
 
 //训练检测模型（gpu版本）
 yolo detect train model=yolo11n.pt data=xxx/data.yaml batch=-1 epochs=1000 imgsz=640 save_period=5 device=cuda 
@@ -60,7 +60,6 @@ yolo export model=best.pt format=openvino
 
 ### mo命令将pt模型转换为openvino模型（方式二）
 * mo命令是openvino官方提供的模型转换工具
-* mo参考文档 https://blog.csdn.net/qq_44632658/article/details/131270531
 ~~~
 //安装mo命令行，将onnx转换为openvino模型
 //依赖库：pip install openvino==2024.3.0 openvino-dev==2024.3.0 onnxruntime==1.19.0 onnx==1.16.1  -i https://pypi.tuna.tsinghua.edu.cn/simple

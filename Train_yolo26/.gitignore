@@ -1,0 +1,15 @@
+﻿# clion
+.idea/
+# vs
+.vs
+
+
+dist/*
+build/*
+runs/*
+venv/*
+__pycache__
+
+data/*
+datasets/*
+yolo26n.onnx
