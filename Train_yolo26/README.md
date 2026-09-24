@@ -49,11 +49,11 @@ yolo detect predict model=runs/train/best.pt source=test.jpg
 
 //将pt模型转换为onnx格式模型
 //依赖库：pip install onnxruntime==1.19.0 onnx==1.16.1  -i https://pypi.tuna.tsinghua.edu.cn/simple
-yolo export model=best.pt format=onnx
+yolo export model=best.pt format=onnx nms=True
 
 //将pt模型转换为openvino格式模型
 //依赖库：pip install openvino==2024.3.0 openvino-dev==2024.3.0 onnxruntime==1.19.0 onnx==1.16.1  -i https://pypi.tuna.tsinghua.edu.cn/simple
-yolo export model=best.pt format=openvino
+yolo export model=best.pt format=openvino nms=True
 
 ~~~
 
@@ -63,14 +63,14 @@ yolo export model=best.pt format=openvino
 ~~~
 //安装mo命令行，将onnx转换为openvino模型
 //依赖库：pip install openvino==2024.3.0 openvino-dev==2024.3.0 onnxruntime==1.19.0 onnx==1.16.1  -i https://pypi.tuna.tsinghua.edu.cn/simple
-yolo export model=yolo26n.pt format=onnx
+yolo export model=yolo26n.pt format=onnx nms=True
 mo --input_model yolo26n.onnx  --output_dir yolov8n_openvino_model
 ~~~
 
 ### trtexec命令将pt模型转换为tensorrt模型
 ~~~
 //将pt模型转换为onnx格式模型
-yolo export model=yolo26n.pt format=onnx
+yolo export model=yolo26n.pt format=onnx nms=True
 
 //将onnx模型转换为tensorrt格式模型(在ovtrt版本的视频行为分析系统的xcms_core文件夹下面有trtexec工具)
 trtexec --onnx=yolo26n.onnx --saveEngine=yolo26n.fp16.engine --fp16
