@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """D-FINE ONNX -> OpenVINO IR（xml + bin），静态 fp32（默认），可静态 fp16。
 
 产物统一落地到 models/d-fine-openvino2024.6-static-fp32/ ，文件名自带版本 + 精度 + 静态：
@@ -16,13 +16,13 @@
   即便这里导出 fp16 IR，在 GPU 上仍需强制 f32 推理精度 hint 才安全。
   结论：除非你只在 CPU 上跑或用 2026.4.1+ 运行时，否则默认 fp32 最稳。
 
-用法（在工程根目录执行）：
-    venv\\Scripts\\python.exe tools\\deployment\\export_openvino.py \\
-        models/d-fine-onnx-dyn-opset17/dfine_n_coco_opset17.onnx
-    venv\\Scripts\\python.exe tools\\deployment\\export_openvino.py \\
-        models/d-fine-onnx-dyn-opset17/dfine_n_coco_opset17.onnx --target-ov 2024.6
-    venv\\Scripts\\python.exe tools\\deployment\\export_openvino.py \\
-        models/d-fine-onnx-dyn-opset17/dfine_n_coco_opset17.onnx --fp16
+用法（在工程根目录执行，输入一律用【静态】ONNX，静态转静态）：
+    venv\\Scripts\\python.exe tools\\export\\export_openvino.py \\
+        models/d-fine-onnx-opset17-static-fp32/dfine_n_coco_opset17_fp32_static.onnx
+    venv\\Scripts\\python.exe tools\\export\\export_openvino.py \\
+        models/d-fine-onnx-opset17-static-fp32/dfine_n_coco_opset17_fp32_static.onnx --target-ov 2024.6
+    venv\\Scripts\\python.exe tools\\export\\export_openvino.py \\
+        models/d-fine-onnx-opset17-static-fp32/dfine_n_coco_opset17_fp32_static.onnx --fp16
 """
 import os
 import sys
@@ -89,11 +89,11 @@ def convert_one(onnx_path, target_ov, fp16, dynamic):
     import numpy as np
     import openvino as ov
 
-    assert os.path.isfile(onnx_path), "缺少 ONNX: %s（先跑 tools\\deployment\\export_onnx.py）" % onnx_path
+    assert os.path.isfile(onnx_path), "缺少 ONNX: %s（先跑 export_onnx.py + export_onnx_static.py 生成静态版）" % onnx_path
     import re
 
     stem = os.path.splitext(os.path.basename(onnx_path))[0]  # dfine_n_coco_opset17
-    stem = re.sub(r"_opset\d+$", "", stem)  # -> dfine_n_coco（去掉 onnx 的 opset 标记）
+    stem = re.sub(r"(_opset\d+|_fp\d+|_dyn|_static)+$", "", stem)  # -> dfine_n_coco（去掉 opset/精度/动静态标记）
     suffix = "%s_%s" % (target_ov, "fp16" if fp16 else "fp32")
     shape_tag = "" if dynamic else "_static"
     xml_name = "%s_ov%s%s.xml" % (stem, suffix, shape_tag)

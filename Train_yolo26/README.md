@@ -76,6 +76,20 @@ yolo export model=yolo26n.pt format=onnx nms=True
 trtexec --onnx=yolo26n.onnx --saveEngine=yolo26n.fp16.engine --fp16
 ~~~
 
+### 将pt模型转换为rknn格式模型（RK3576/RK3588/RK3568等瑞芯微NPU）
+* 无需魔改源码，ultralytics 8.4.159 原生支持，两步完成（已实测）
+~~~
+//第一步：PC导出RKNN适配ONNX（Windows可做；最后装rknn-toolkit2会失败属正常，此时ONNX已生成）
+//name为目标芯片：rk3576/rk3588/rk3568/rk3566/rk3562等；quantize=16为fp16版
+yolo export model=best.pt format=rknn name=rk3576 quantize=16
+
+//int8量化版需提供校准数据集（建议100~200张真实场景图）
+yolo export model=best.pt format=rknn name=rk3576 quantize=8 data=xxx/data.yaml
+
+//第二步：在Linux端（瑞芯微板子本身，或x86 Linux/Docker）用rknn-toolkit2把适配ONNX转成.rknn
+//板端环境搭建、转换脚本、验证方法、踩坑清单，详见 export_rknn.md
+~~~
+
 ### yolo开源地址
 * yolo开源地址：https://github.com/ultralytics/ultralytics
 

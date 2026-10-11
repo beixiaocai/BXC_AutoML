@@ -28,11 +28,6 @@
 # ---- 工具（部署导出三件套 / 推理验证 / 数据集转换 / 批量训练）----
 !/tools/**
 
-# ---- tests：只放代码与测试图，运行产物（out/logs）不入库 ----
-!/tests/**
-tests/out/
-tests/logs/
-
 # ---- 参考脚本 ----
 !/reference/**
 
@@ -46,7 +41,8 @@ tests/logs/
 __pycache__/
 *.pyc
 tools/sedbg3jhq
-tools/deployment/logs/
+tools/inference/logs/
+tools/inference/out/
 
 # ---- 显式屏蔽：训练归档权重（大文件，绝不入库）----
 best_models/

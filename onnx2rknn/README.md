@@ -1,5 +1,6 @@
 # onnx2rknn
 * 在x86或arm架构的处理器上，将onnx模型转换为rknn模型
+* 定位说明：ResNet / XcFaceNet / DeepSort 等模型的 rknn 转换仍使用本模块；YOLO 检测模型推荐 Train_yolo26 原生导出 rknn（训练与转换同一框架，无需本模块），本模块的 YOLO 转换脚本仅服务于 old/ 目录的历史 rk 版模型
 
 ### 第一步（安装模型转换环境）
 * 如下提供三种安装模型转换环境的方式，任选其一
@@ -65,14 +66,18 @@ pip install 3rdparty-arm/rknn_toolkit2-2.3.0-cp38-cp38-manylinux_2_17_aarch64.ma
 ~~~
 
 ### 第二步（模型转换：onnx模型->rknn模型）
-* 首先，看到本文档的你，请务必清楚的知道：用于转换rknn的onnx，并不是通用的onnx，关于这一点，如果你还是不明白，请首先查看如下文档
-* 训练rk版yolo5并获得onnx模型文档：https://gitee.com/yuturuishi/ytstudio/tree/master/Train_rk_yolo5
-* 训练rk版yolo8并获得onnx模型文档：https://gitee.com/yuturuishi/ytstudio/tree/master/Train_rk_yolo8
-* 训练rk版yolo11并获得onnx模型文档：https://gitee.com/yuturuishi/ytstudio/tree/master/Train_rk_yolo11
-
+* 首先，看到本文档的你，请务必清楚的知道：用于转换rknn的onnx，并不是通用的onnx。按模型类型分三种情况：
+  - **YOLO 检测（新方案，推荐）**：用 Train_yolo26 训练，`yolo export format=rknn` 一条命令完成"适配ONNX导出 + rknn转换"，见 Train_yolo26/export_rknn.md，无需本模块
+  - **YOLO 检测（历史方案）**：onnx 必须来自 old/ 目录的 rk 版训练框架（魔改源码版），再用下方 onnx2rknn_Yolo.py 转换，仅作历史保留
+  - **其他模型（ResNet / XcFaceNet / DeepSort 等）**：训练框架导出 onnx 后，用本模块对应脚本转换
 * 接下来，如果你已经训练并获得了可用于转换rknn的onnx，那就开始进行模型转换吧
 ~~~
-//将yolo5/yolo8/yolo11训练的onnx转换为rknn
+//将old目录 rk 版 yolo5/yolo8/yolo11 的onnx转换为rknn（历史方案，onnx_filename 和 platform 在脚本内修改）
 python3 onnx2rknn_Yolo.py 
+
+//将其他模型的onnx转换为rknn（onnx文件名与目标平台在脚本内修改）
+python3 onnx2rknn_ResNet.py
+python3 onnx2rknn_XcFaceNet.py
+python3 onnx2rknn_DeepSort.py
 
 ~~~

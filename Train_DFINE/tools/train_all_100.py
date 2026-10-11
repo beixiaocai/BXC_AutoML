@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """D-FINE N 场景模型批量训练编排器（100 轮变体 train_all_100）。
 
 参考 Train_yolo26 的 best_models 归档约定：
@@ -201,7 +201,7 @@ def load_sd_for_export(ckpt_path):
 
 
 def export_onnx(cfg_path, ckpt_path, onnx_path):
-    """best 权重 → ONNX（与 tests/export2onnx.py 同口径：opset17/batch1/端到端）。"""
+    """best 权重 → ONNX（与 tools/export/export_onnx.py 同口径：opset17/batch1/端到端）。"""
     import torch
     import torch.nn as nn
     sys.path.insert(0, PROJ)

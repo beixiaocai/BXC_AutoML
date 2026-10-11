@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-"""用 ONNX Runtime 推理测试图：检出效果 + 每张图片的推理耗时（+ 可选保真复核）。
+"""用 ONNX Runtime 推理【动态】ONNX 模型：检出效果 + 每张图片的推理耗时（+ 可选保真复核）。
 
-模型位置：weights/onnx/dfine_<档>.onnx（由 export/20_export_onnx.py 生成）
-测试图：  tests/bus.jpg 等本目录图片，或 --images 指定
-结果图：  tests/out/<运行时间戳>/out_onnx_<图>_<档>.jpg
-日志：    tests/logs/test_onnx_<时间戳>_<pid>.log
+模型位置：models/d-fine-onnx-opset17-dyn-fp32/dfine_<档>_coco_opset17_fp32_dyn.onnx
+测试图：  tools/inference/bus.jpg（默认回退 tools/export/bus.jpg）或 --images 指定
+结果图：  tools/inference/out/<运行时间戳>/out_onnx_<图>_<档>.jpg
+日志：    tools/inference/logs/test_onnx_dyn_<时间戳>_<pid>.log
+预处理：  BGR→RGB、/255，无 ImageNet 均值方差（与 D-FINE 训练/验证口径一致）
 
 用法（在工程根目录执行）：
-    venv\\Scripts\\python.exe tests\\test_onnx.py                # 五档全跑
-    venv\\Scripts\\python.exe tests\\test_onnx.py n x            # 指定档
-    venv\\Scripts\\python.exe tests\\test_onnx.py --conf 0.3 --repeat 20
-    venv\\Scripts\\python.exe tests\\test_onnx.py --verify           # 加 .pth 保真比对
-    venv\\Scripts\\python.exe tests\\test_onnx.py --images a.jpg b.jpg
+    venv\\Scripts\\python.exe tools\\inference\\test_onnx_dyn.py                # 五档全跑
+    venv\\Scripts\\python.exe tools\\inference\\test_onnx_dyn.py n x            # 指定档
+    venv\\Scripts\\python.exe tools\\inference\\test_onnx_dyn.py --conf 0.3 --repeat 20
+    venv\\Scripts\\python.exe tools\\inference\\test_onnx_dyn.py --verify           # 加 .pth 保真比对
+    venv\\Scripts\\python.exe tools\\inference\\test_onnx_dyn.py --images a.jpg b.jpg
 
 注意：--verify 会建 PyTorch 模型，而 D-FINE 的 YAMLConfig 有全局配置残留，
 多档位时本脚本会自动逐档起独立子进程（与 export/_isolate.py 同一套逻辑）。
@@ -22,15 +23,14 @@ import sys
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PROJ = os.path.dirname(HERE)
-ONNX_DIR = os.path.join(PROJ, "weights", "onnx")
-WEIGHTS = os.path.join(PROJ, "weights")
+PROJ = os.path.dirname(os.path.dirname(HERE))
+ONNX_DIR = os.path.join(PROJ, "models", "d-fine-onnx-opset17-dyn-fp32")
+WEIGHTS = os.path.join(PROJ, "models")
 RUN_TAG = time.strftime("%Y%m%d-%H%M%S")
 OUT_DIR = os.path.join(HERE, "out", RUN_TAG)
 VARIANTS = ["n", "s", "m", "l", "x"]
+MODEL_NAME = "dfine_%s_coco_opset17_fp32_dyn.onnx"
 SIZE = 640
-MEAN = [0.485, 0.456, 0.406]
-STD = [0.229, 0.224, 0.225]
 
 COCO80 = [
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
@@ -69,7 +69,7 @@ def setup_log():
     d = os.path.join(HERE, "logs")
     os.makedirs(d, exist_ok=True)
     path = os.path.join(
-        d, "test_onnx_%s_%d.log" % (time.strftime("%Y%m%d-%H%M%S"), os.getpid())
+        d, "test_onnx_dyn_%s_%d.log" % (time.strftime("%Y%m%d-%H%M%S"), os.getpid())
     )
     f = open(path, "w", encoding="utf-8", newline="\n")
 
@@ -110,7 +110,6 @@ CHILD_FLAG = "_DFINE_TEST_ONNX_CHILD"
 def preprocess(img, cv2, np):
     r = cv2.resize(img, (SIZE, SIZE), interpolation=cv2.INTER_LINEAR)
     x = cv2.cvtColor(r, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
-    x = (x - np.array(MEAN, np.float32)) / np.array(STD, np.float32)
     return np.ascontiguousarray(x.transpose(2, 0, 1)[None])
 
 
@@ -283,12 +282,13 @@ def main(argv):
         i += 1
     variants = variants or VARIANTS
     if not imgs:
-        for c in [os.path.join(HERE, "bus.jpg")]:
+        for c in [os.path.join(HERE, "bus.jpg"),
+                  os.path.join(os.path.dirname(HERE), "export", "bus.jpg")]:
             if os.path.isfile(c):
                 imgs.append(c)
     imgs = [p for p in imgs if os.path.isfile(p)]
     if not imgs:
-        print("!! 没有可用测试图，请用 --images 指定，或把 bus.jpg 放到 tests/ 下")
+        print("!! 没有可用测试图，请用 --images 指定，或把 bus.jpg 放到 tools/inference 下（默认回退 tools/export）")
         return 1
     os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -320,9 +320,9 @@ def main(argv):
 
     summary = []
     for v in variants:
-        onnx_p = os.path.join(ONNX_DIR, "dfine_%s.onnx" % v)
+        onnx_p = os.path.join(ONNX_DIR, MODEL_NAME % v)
         if not os.path.isfile(onnx_p):
-            print("[%s] 缺少 %s（先跑 tests\\export2onnx.py）" % (v, os.path.basename(onnx_p)))
+            print("[%s] 缺少 %s（先跑 tools\\export\\export_onnx.py）" % (v, os.path.basename(onnx_p)))
             continue
         sess = ort.InferenceSession(onnx_p, providers=["CPUExecutionProvider"])
         inames = [i.name for i in sess.get_inputs()]

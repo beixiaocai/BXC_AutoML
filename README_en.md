@@ -19,15 +19,28 @@ ytstudio is a modular collection of training and deployment tools for AI vision 
 
 | Module | Task | Description | Status |
 |---|---|---|---|
-| Train_yolo8 / Train_yolo11 / Train_yolo26 | Object detection | Official YOLO training frameworks | Built-in |
+| Train_yolo8 / Train_yolo11 / Train_yolo26 | Object detection | Official YOLO training frameworks; **Train_yolo26 natively supports rknn export (recommended for Rockchip)** | Built-in |
 | Train_DFINE | End-to-end object detection | D-FINE-based (Apache-2.0) NMS-free detection framework; exports to ONNX / OpenVINO / TensorRT | Built-in |
-| Train_rk_yolo5 / Train_rk_yolo8 / Train_rk_yolo11 | Edge object detection | YOLO training frameworks for Rockchip devices | Built-in |
+| Train_rk_yolo5 / Train_rk_yolo8 / Train_rk_yolo11 | Edge object detection | Legacy Rockchip-specific YOLO training frameworks (source-modified forks), hard to keep up with upstream | **Not recommended** (moved to `old/`) |
 | onnx2rknn | Model conversion | Convert onnx models to rknn on x86 / arm | Built-in |
 | Train_ResNet | Image classification | ResNet-based image classification training framework | Built-in |
 | Train_AudioNet | Audio classification | Audio clip classification training framework | Migrated to standalone repo |
 | Train_VideoNet | Video classification | Video clip classification training framework | Migrated to standalone repo |
 | Train_XcFaceNet | Face recognition | Face feature extraction training framework | Migrated to standalone repo |
 | Train_PaddleOCR_Plate | License-plate recognition | Commercial-grade plate recognition based on PaddleOCR & PP-OCRv4 | Migrated to standalone repo |
+
+## Rockchip (RK) Device Deployment: Recommended YOLO Route
+
+To train YOLO models for Rockchip devices, use **`Train_yolo26`** directly. ultralytics 8.4.x natively supports `format="rknn"` export — training and conversion stay in one framework, no source-code forks needed:
+
+```
+Train_yolo26 training → yolo export model=best.pt format=rknn name=rk3576 → convert to .rknn with rknn-toolkit2 on the board
+```
+
+- Full step-by-step guide (PC ONNX export, board environment setup, int8 calibration requirements, pitfalls): see `Train_yolo26/export_rknn.md`
+- Verified on RK3576 hardware (fp16 13fps / int8 25fps @640); RK3588 / RK3568 conversions passed; yolo8 / yolo11 can follow the same export flow
+- ⚠️ **Inference-side version requirement: rebekah v5.304 or later**. The rknn models produced by this route use the new single-output format `(1, 84, 8400)`; **rebekah versions before v5.304 cannot run them** — upgrade rebekah before deployment
+- `Train_rk_yolo5 / Train_rk_yolo8 / Train_rk_yolo11` are early edge solutions based on modified ultralytics source (Focus rewrite, DFL removal, external anchors) — fragmented from upstream and hard to keep up with upgrades, **not recommended for new projects**, kept for history only (moved to `old/`)
 
 ## Project Structure
 
@@ -37,7 +50,7 @@ ytstudio is organized by task type into multiple independent training modules:
 ytstudio/
 ├── Train_yolo8/  Train_yolo11/  Train_yolo26/    # Official YOLO training frameworks (object detection)
 ├── Train_DFINE/          # D-FINE end-to-end NMS-free detection framework (Apache-2.0)
-├── Train_rk_yolo5/  Train_rk_yolo8/  Train_rk_yolo11/  # Rockchip edge YOLO training frameworks
+├── old/                   # Legacy: Train_rk_yolo5/8/11 (old Rockchip source-modified forks, not recommended)
 ├── onnx2rknn/              # onnx → rknn model conversion tool
 ├── Train_ResNet/          # Image classification training framework
 ├── Train_AudioNet/        # Audio classification (migrated to standalone repo)
@@ -74,7 +87,7 @@ PyTorch + CUDA | Ultralytics YOLO | OpenCV / PIL / NumPy | RKNN Toolkit / ONNX R
 
 1. Download a training dataset (see "Free Training Datasets" below).
 2. Enter the corresponding training module directory, configure the dataset path per that module's README, and start training.
-3. After training produces an onnx model, if deploying to Rockchip devices, use `onnx2rknn` to convert it to rknn.
+3. For Rockchip deployment: train YOLO detection models with `Train_yolo26` and export rknn natively via ultralytics (see `Train_yolo26/export_rknn.md`); for other models, export onnx after training and convert with `onnx2rknn`. Note: YOLO rknn models require rebekah v5.304+ on the inference side — upgrade older versions first.
 
 > Each built-in module ships its own README with configuration and training details; follow the module README.
 

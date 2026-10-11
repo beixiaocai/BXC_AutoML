@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """D-FINE 官方 .pth -> ONNX（端到端，含部署后处理，无 NMS）。
 
-与旧版 tools/deployment/export_onnx.py 相比的关键修正（旧版在本机会踩坑）：
+与旧版 tools/export/export_onnx.py 相比的关键修正（旧版在本机会踩坑）：
   1) opset_version 16 -> 17 ：DETR/Transformer 系低 opset 导出后精度会【静默崩坏】
   2) dummy 输入 batch 32 -> 1 ：官方写死 (32,3,640,640)，导出件会带死 batch 维
   3) 显式 dynamo=False ：torch 2.14+ 默认走 dynamo 导出器，产物 opset 被抬到 18 且
      输出外置数据双文件，必须关掉才能得到 opset17 单文件
   4) 不做 onnxsim 简化 ：dynamic_axes 下 onnxsim 会改坏形状（参考 tests 版结论）
 
-产物统一落地到 models/d-fine-onnx-dyn-opset17/ ，文件名自带档位 + 数据集 + opset：
-    dfine_{variant}_{dataset}_opset17.onnx
-  官方 COCO 权重 -> dfine_n_coco_opset17.onnx （dataset 默认 coco）
-  自定义训练权重 -> dfine_n_fire_smoke_opset17.onnx （dataset 用 --dataset-tag 指定）
+产物统一落地到 models/d-fine-onnx-opset17-dyn-fp32/ ，文件名自带档位 + 数据集 + opset + 动静态标识：
+    dfine_{variant}_{dataset}_opset17_fp32_dyn.onnx
+  官方 COCO 权重 -> dfine_n_coco_opset17_fp32_dyn.onnx （dataset 默认 coco）
+  自定义训练权重 -> dfine_n_fire_smoke_opset17_fp32_dyn.onnx （dataset 用 --dataset-tag 指定）
+  静态版（批量固化）由 tools/export/export_onnx_static.py 生成到 d-fine-onnx-opset17-static-fp32/
 
 ⚠️ D-FINE 的 YAMLConfig 有【全局配置残留】：同一进程连续加载多档配置会互相串味
 （后档继承前档的 dim_feedforward/use_lab 等字段），表现为 state_dict "size mismatch /
@@ -25,9 +26,9 @@ missing keys lab.*" 的假故障。所以多档位时本脚本自动逐档起独
   输出 labels[N,300] / boxes[N,300,4](xyxy) / scores[N,300] ，端到端无 NMS。
 
 用法（在工程根目录执行）：
-    venv\\Scripts\\python.exe tools\\deployment\\export_onnx.py n            # 官方 coco n
-    venv\\Scripts\\python.exe tools\\deployment\\export_onnx.py n s m l x    # 官方五档
-    venv\\Scripts\\python.exe tools\\deployment\\export_onnx.py \\
+    venv\\Scripts\\python.exe tools\\export\\export_onnx.py n            # 官方 coco n
+    venv\\Scripts\\python.exe tools\\export\\export_onnx.py n s m l x    # 官方五档
+    venv\\Scripts\\python.exe tools\\export\\export_onnx.py \\
         --config configs/dfine/scenes/dfine_hgnetv2_n100_fire_smoke.yml \\
         --resume best_models/xxx.pth --variant n --dataset-tag fire_smoke
 权重缺失且为官方档位时会自动从 D-FINE 官方 GitHub release 下载（带镜像回退）。
@@ -39,7 +40,7 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJ = os.path.dirname(os.path.dirname(HERE))  # Train_DFINE 根
 MODELS_DIR = os.path.join(PROJ, "models")
-ONNX_DIR = os.path.join(MODELS_DIR, "d-fine-onnx-dyn-opset17")
+ONNX_DIR = os.path.join(MODELS_DIR, "d-fine-onnx-opset17-dyn-fp32")
 VARIANTS = ["n", "s", "m", "l", "x"]
 OPSET = 17  # 关键：不能低于 17
 SIZE = 640
@@ -170,7 +171,7 @@ def build_and_export(variant, cfg_path=None, resume=None, dataset_tag=None):
         dataset_tag = dataset_tag or "coco"
         assert os.path.isfile(cfg_path), "缺少配置: %s" % cfg_path
 
-    onnx_name = "dfine_%s_%s_opset17.onnx" % (variant, dataset_tag)
+    onnx_name = "dfine_%s_%s_opset17_fp32_dyn.onnx" % (variant, dataset_tag)
     onnx_path = os.path.join(ONNX_DIR, onnx_name)
 
     print("=" * 74)
@@ -255,7 +256,7 @@ def build_and_export(variant, cfg_path=None, resume=None, dataset_tag=None):
         same = int((out_pt[0].numpy().astype("int64") == np.asarray(out_ort[0]).astype("int64")).sum())
         ds = float(np.abs(out_pt[2].numpy().astype("float64") - np.asarray(out_ort[2], dtype="float64")).max())
         print("[%s]   labels 逐元素一致 %d/%d | scores 最大绝对差 %.3e" % (variant, same, out_pt[0].numel(), ds))
-        print("[%s]   真实图片保真复核请跑: tests\\test_onnx.py %s --verify" % (variant, variant))
+        print("[%s]   真实图片保真复核请跑: tools\\inference\\test_onnx_dyn.py %s --verify" % (variant, variant))
     except Exception as e:
         print("[%s]   (ORT 冒烟校验跳过: %s)" % (variant, e))
 

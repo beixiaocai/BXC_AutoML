@@ -12,4 +12,5 @@
 
 # 当前已纳入版本控制的文件
 !/README.md
+!/export_rknn.md
 !/yolo26n.pt

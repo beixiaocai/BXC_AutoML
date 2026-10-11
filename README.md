@@ -20,14 +20,27 @@ ytstudio 是一套面向 AI 视觉与音频算法的训练与部署工具集合�
 | 模块 | 任务类型 | 说明 | 状态 |
 |---|---|---|---|
 | Train_DFINE | 目标检测（端到端） | 基于 D-FINE（Apache-2.0）的端到端无 NMS 检测框架，支持导出 ONNX / OpenVINO / TensorRT | 内置 |
-| Train_yolo8 / Train_yolo11 / Train_yolo26 | 目标检测 | YOLO 官方训练框架 | 内置 |
-| Train_rk_yolo5 / Train_rk_yolo8 / Train_rk_yolo11 | 目标检测（边缘） | 适用于瑞芯微设备的 YOLO 模型训练框架 | 内置 |
-| onnx2rknn | 模型转换 | 在 x86 / arm 上将 onnx 模型转换为 rknn 模型 | 内置 |
+| Train_yolo8 / Train_yolo11 / Train_yolo26 | 目标检测 | YOLO 官方训练框架；**Train_yolo26 原生支持导出 rknn（瑞芯微推荐）** | 内置 |
+| Train_rk_yolo5 / Train_rk_yolo8 / Train_rk_yolo11 | 目标检测（边缘） | 早期瑞芯微专用 YOLO 魔改训练框架，与官方版割裂、难跟随升级 | **不建议使用**（已移至 `old/`） |
+| onnx2rknn | 模型转换 | 在 x86 / arm 上将 onnx 模型转换为 rknn 模型（ResNet / XcFaceNet / DeepSort 等仍用本模块；YOLO 推荐 Train_yolo26 原生导出，无需本模块） | 内置 |
 | Train_ResNet | 图像分类 | 基于 ResNet 的图片分类算法训练框架 | 内置 |
 | Train_AudioNet | 音频分类 | 音频片段分类算法训练框架 | 已迁移独立仓库 |
 | Train_VideoNet | 视频分类 | 视频片段分类算法训练框架 | 已迁移独立仓库 |
 | Train_XcFaceNet | 人脸识别 | 人脸特征提取算法训练框架 | 已迁移独立仓库 |
 | Train_PaddleOCR_Plate | 车牌识别 | 基于 PaddleOCR 与 PP-OCRv4 训练商用级车牌识别模型 | 已迁移独立仓库 |
+
+## 瑞芯微（RK）设备部署：YOLO 推荐路线
+
+**训练 yolo 模型用于瑞芯微设备，推荐直接使用 `Train_yolo26`**。ultralytics 8.4.x 已原生支持 `format="rknn"` 导出，训练与转换在同一框架内完成，无需魔改源码：
+
+```
+Train_yolo26 训练 → yolo export model=best.pt format=rknn name=rk3576 → 板端 rknn-toolkit2 转 .rknn
+```
+
+- 完整分步指南（PC 导出适配 ONNX、板端环境搭建、int8 校准集要求、踩坑清单）：见 `Train_yolo26/export_rknn.md`
+- 已实测：RK3576 真机推理（fp16 13fps / int8 25fps @640），RK3588 / RK3568 转换通过；yolo8 / yolo11 同样适用该导出流程
+- ⚠️ **推理端版本要求：rebekah v5.304 及以上**。该方案转换出的 rknn 为新输出格式（单输出 `(1, 84, 8400)`），**rebekah v5.304 以下版本无法使用**，部署前请先升级 rebekah
+- `Train_rk_yolo5 / Train_rk_yolo8 / Train_rk_yolo11` 是早期通过修改 ultralytics 源码（改 Focus、删 DFL、锚点外置）实现的边缘方案，与官方版本割裂、难以跟随升级，**不建议新项目使用**，仅作历史保留（已移至 `old/` 目录）
 
 ## 项目结构
 
@@ -37,7 +50,7 @@ ytstudio 仓库按任务类型组织为多个独立训练模块：
 ytstudio/
 ├── Train_DFINE/          # D-FINE 端到端无 NMS 检测训练框架（Apache-2.0）
 ├── Train_yolo8/  Train_yolo11/  Train_yolo26/    # YOLO 官方训练框架（目标检测）
-├── Train_rk_yolo5/  Train_rk_yolo8/  Train_rk_yolo11/  # 瑞芯微边缘 YOLO 训练框架
+├── old/                   # 历史保留：Train_rk_yolo5/8/11 早期瑞芯微魔改方案（不建议使用）
 ├── onnx2rknn/              # onnx → rknn 模型转换工具
 ├── Train_ResNet/          # 图像分类训练框架
 ├── Train_AudioNet/        # 音频分类（已迁移独立仓库）
@@ -74,7 +87,7 @@ PyTorch + CUDA | Ultralytics YOLO | OpenCV / PIL / NumPy | RKNN Toolkit / ONNX R
 
 1. 下载训练数据集（见下方「免费训练数据集」）。
 2. 进入对应训练模块目录，按该模块的 README 配置数据集路径并启动训练。
-3. 训练产出 onnx 模型后，如需部署到瑞芯微设备，使用 `onnx2rknn` 将其转换为 rknn 格式。
+3. 如需部署到瑞芯微设备：YOLO 检测模型推荐用 `Train_yolo26` 训练，并通过 ultralytics 原生导出 rknn（见 `Train_yolo26/export_rknn.md`）；其他模型可训练产出 onnx 后，使用 `onnx2rknn` 转换为 rknn 格式。注意：YOLO 的 rknn 模型需 rebekah v5.304+ 才能推理，旧版本请先升级。
 
 > 各内置模块均自带独立 README，包含该模块的配置与训练细节，请以模块 README 为准。
 
